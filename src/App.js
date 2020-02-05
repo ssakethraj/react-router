@@ -1,16 +1,46 @@
 import React, { Component } from "react";
 import Home from "./Components/Home";
 import Signin from "./Components/Signin";
-import Contact from "./Components/About";
+import About from "./Components/About";
 import Header from "./Components/Navbar";
-import { BrowserRouter, Route } from "react-router-dom";
+import WatchList from "./Components/WatchList";
+import { BrowserRouter, Route, Redirect } from "react-router-dom";
 import "./App.css";
 
+const PrivateRoute = ({ path, Component, isLoggedin }) => {
+  return (
+    <Route
+      path={path}
+      render={props => {
+        console.log("Location of component", props.location);
+        if (isLoggedin) {
+          return <Component {...props} />;
+        } else {
+          return (
+            <Redirect
+              to={{
+                pathname: "/signin",
+                state: { prevLocation: props.location.pathname }
+              }}
+            />
+          );
+        }
+      }}
+    />
+  );
+};
+
 class App extends Component {
-  state = {
-    value: "",
-    isLoggedin: false
-  };
+  constructor(props) {
+    super(props);
+
+    // this.isLoggedin = false;
+
+    this.state = {
+      value: "",
+      isLoggedin: false
+    };
+  }
   handleChange = e => {
     this.setState({
       value: e.target.value
@@ -44,13 +74,47 @@ class App extends Component {
           <Route
             path="/home"
             render={props => {
-              return <Home {...props} value={this.state.value} />;
+              if (this.state.isLoggedin) {
+                return <Home {...props} value={this.state.value} />;
+              } else {
+                return <Redirect to="/signin" />;
+              }
             }}
           />
-          <Route path="/contact" component={Contact} />
+          <PrivateRoute
+            path="/watchlist"
+            Component={WatchList}
+            isLoggedin={this.state.isLoggedin}
+          />
+          <PrivateRoute
+            path="/about"
+            Component={About}
+            isLoggedin={this.state.isLoggedin}
+          />
+          {/* <Route
+            path="/watchlist"
+            render={props => {
+              if (this.state.isLoggedin) {
+                return <WatchList {...props} value={this.state.value} />;
+              } else {
+                return <Redirect to="/signin" />;
+              }
+            }}
+          /> */}
+          {/* <Route
+            path="/about"
+            render={props => {
+              if (this.state.isLoggedin) {
+                return <About {...props} value={this.state.value} />;
+              } else {
+                return <Redirect to="/signin" />;
+              }
+            }}
+          /> */}
           <Route
             path="/signin"
             render={props => {
+              // no access to previous pathname
               return (
                 <Signin
                   {...props}

@@ -3,9 +3,16 @@ import { Redirect } from "react-router-dom";
 
 class Signin extends React.Component {
   render() {
-    const { value, handleChange, handleLogin, isLoggedin } = this.props;
+    const {
+      value,
+      handleChange,
+      handleLogin,
+      isLoggedin,
+      history
+    } = this.props;
+    const { state } = history.location;
     if (isLoggedin) {
-      return <Redirect to="/home" />;
+      return <Redirect to={state ? state.prevLocation : "/home"} />;
     }
     return (
       <div>
