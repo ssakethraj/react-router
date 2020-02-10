@@ -6,14 +6,15 @@ import Header from "./Components/Navbar";
 import WatchList from "./Components/WatchList";
 import { BrowserRouter, Route, Redirect } from "react-router-dom";
 import "./App.css";
+import { connect } from "react-redux";
 
-const PrivateRoute = ({ path, Component, isLoggedin }) => {
+const PrivateRoute = ({ path, Component, user }) => {
   return (
     <Route
       path={path}
       render={props => {
         console.log("Location of component", props.location);
-        if (isLoggedin) {
+        if (user) {
           return <Component {...props} />;
         } else {
           return (
@@ -31,71 +32,29 @@ const PrivateRoute = ({ path, Component, isLoggedin }) => {
 };
 
 class App extends Component {
-  constructor(props) {
-    super(props);
-
-    // this.isLoggedin = false;
-
-    this.state = {
-      value: "",
-      isLoggedin: false
-    };
-  }
-  handleChange = e => {
-    this.setState({
-      value: e.target.value
-    });
-  };
-  handleLogin = () => {
-    const { value } = this.state;
-    if (value !== "") {
-      this.setState({
-        isLoggedin: true
-      });
-    }
-    console.log("Value", this.state.value);
-  };
   render() {
+    const { user } = this.props;
     return (
       <div className="App">
         <BrowserRouter>
-          <Route
-            path="/"
-            render={props => {
-              return (
-                <Header
-                  {...props}
-                  value={this.state.value}
-                  isLoggedin={this.state.isLoggedin}
-                />
-              );
-            }}
-          />
+          <Route path="/" component={Header} />
           <Route
             path="/home"
             render={props => {
-              if (this.state.isLoggedin) {
-                return <Home {...props} value={this.state.value} />;
+              if (user) {
+                return <Home {...props} />;
               } else {
                 return <Redirect to="/signin" />;
               }
             }}
           />
-          <PrivateRoute
-            path="/watchlist"
-            Component={WatchList}
-            isLoggedin={this.state.isLoggedin}
-          />
-          <PrivateRoute
-            path="/about"
-            Component={About}
-            isLoggedin={this.state.isLoggedin}
-          />
+          <PrivateRoute path="/watchlist" Component={WatchList} user={user} />
+          <PrivateRoute path="/about" Component={About} user={user} />
           {/* <Route
             path="/watchlist"
             render={props => {
-              if (this.state.isLoggedin) {
-                return <WatchList {...props} value={this.state.value} />;
+              if (user) {
+                return <WatchList {...props}  />;
               } else {
                 return <Redirect to="/signin" />;
               }
@@ -104,32 +63,25 @@ class App extends Component {
           {/* <Route
             path="/about"
             render={props => {
-              if (this.state.isLoggedin) {
-                return <About {...props} value={this.state.value} />;
+              if (user) {
+                return <About {...props}  />;
               } else {
                 return <Redirect to="/signin" />;
               }
             }}
           /> */}
-          <Route
-            path="/signin"
-            render={props => {
-              // no access to previous pathname
-              return (
-                <Signin
-                  {...props}
-                  handleChange={this.handleChange}
-                  value={this.state.value}
-                  handleLogin={this.handleLogin}
-                  isLoggedin={this.state.isLoggedin}
-                />
-              );
-            }}
-          />
+          <Route path="/signin" component={Signin} />
         </BrowserRouter>
       </div>
     );
   }
 }
 
-export default App;
+const mapStateToProps = state => {
+  const { user } = state;
+  return {
+    user
+  };
+};
+
+export default connect(mapStateToProps)(App);

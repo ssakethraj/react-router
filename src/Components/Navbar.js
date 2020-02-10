@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { connect } from "react-redux";
 
 function Navbar(props) {
   return (
@@ -14,10 +15,17 @@ function Navbar(props) {
         <li>Watch list</li>
       </Link>
       <Link to="/signin">
-        {!props.isLoggedin ? <button>Signin</button> : <button>Signout</button>}
+        {!props.user ? <button>Signin</button> : <button>Signout</button>}
       </Link>
     </ul>
   );
 }
 
-export default Navbar;
+const mapStateToProps = state => {
+  const { user } = state;
+  return {
+    user
+  };
+};
+
+export default connect(mapStateToProps)(Navbar);
